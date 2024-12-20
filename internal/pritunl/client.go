@@ -46,6 +46,26 @@ type Client interface {
 
 	StartServer(serverId string) error
 	StopServer(serverId string) error
+
+	GetLink(id string) (*Link, error)
+	CreateLink(newLink Link) (*Link, error)
+	UpdateLink(id string, link *Link) error
+	DeleteLink(id string) error
+
+	GetLocation(id string, linkId string) (*Location, error)
+	CreateLocation(newLocation Location) (*Location, error)
+	UpdateLocation(id string, location *Location) error
+	DeleteLocation(id string, linkId string) error
+
+	GetRoute(id string, linkId string, locationId string) (*LocationRoute, error)
+	CreateRoute(newRoute LocationRoute) (*LocationRoute, error)
+	UpdateRoute(id string, route *LocationRoute) error
+	DeleteRoute(id string, linkId string, locationId string) error
+
+	GetHost(id string, linkId string, locationId string, uri any) (*LocationHost, error)
+	CreateHost(newRoute LocationHost) (*LocationHost, error)
+	UpdateHost(id string, route *LocationHost) error
+	DeleteHost(id string, linkId string, locationId string) error
 }
 
 type client struct {
@@ -188,6 +208,116 @@ func (c client) DeleteOrganization(id string) error {
 	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("Non-200 response on deleting the organization\nbody=%s", body)
+	}
+
+	return nil
+}
+
+func (c client) GetLink(id string) (*Link, error) {
+	links, err := c.GetLinks()
+	if err != nil {
+		return nil, fmt.Errorf("GetLink: Error on GetLinks: %s", err)
+	}
+	var link Link
+	for _, v := range links {
+		if v.ID == id {
+			link = v
+		}
+	}
+
+	return &link, nil
+}
+
+func (c client) GetLinks() ([]Link, error) {
+	url := fmt.Sprintf("/link")
+	req, err := http.NewRequest("GET", url, nil)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("GetLink: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 response on getting the links\nbody=%s", body)
+	}
+
+	var links Links
+
+	err = json.Unmarshal(body, &links)
+	if err != nil {
+		return nil, fmt.Errorf("GetLinks: %s: %+v, body=%s", err, links, body)
+	}
+
+	return links.Links, nil
+}
+
+func (c client) CreateLink(newLink Link) (*Link, error) {
+	jsonData, err := json.Marshal(newLink)
+	if err != nil {
+		return nil, fmt.Errorf("CreateLink: Error on marshalling data: %s", err)
+	}
+
+	url := "/link"
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("CreateLink: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 response on creating the link\nbody=%s", body)
+	}
+
+	var link Link
+	err = json.Unmarshal(body, &link)
+	if err != nil {
+		return nil, fmt.Errorf("CreateLink: %s: %+v, name=%s, body=%s", err, link, link.Name, body)
+	}
+
+	return &link, nil
+}
+
+func (c client) UpdateLink(id string, link *Link) error {
+	jsonData, err := json.Marshal(link)
+	if err != nil {
+		return fmt.Errorf("UpdateLink: Error on marshalling data: %s", err)
+	}
+
+	url := fmt.Sprintf("/link/%s", id)
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("UpdateLink: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Non-200 response on updating the link\nbody=%s", body)
+	}
+
+	return nil
+}
+
+func (c client) DeleteLink(id string) error {
+	url := fmt.Sprintf("/link/%s", id)
+	req, err := http.NewRequest("DELETE", url, nil)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("DeleteLink: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Non-200 response on deleting the link\nbody=%s", body)
 	}
 
 	return nil
@@ -853,9 +983,327 @@ func (c client) DetachHostFromServer(hostId, serverId string) error {
 	return nil
 }
 
+// GetLocation Locations
+func (c client) GetLocation(id string, linkId string) (*Location, error) {
+	link, err := c.GetLink(linkId)
+	if err != nil {
+		return nil, fmt.Errorf("GetLocation: Error on getting link: %s", err)
+	}
+	if link == nil {
+		return nil, fmt.Errorf("GetLocation: Error on getting link: %s, %s", err, link)
+	}
+
+	url := fmt.Sprintf("/link/%s/location", linkId)
+	req, err := http.NewRequest("GET", url, nil)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("GetLocation: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 response on getting the locations\nbody=%s", body)
+	}
+
+	var locations []Location
+
+	err = json.Unmarshal(body, &locations)
+	if err != nil {
+		return nil, fmt.Errorf("GetLocation: %s: %+v, body=%s", err, locations, body)
+	}
+
+	var location Location
+	for _, v := range locations {
+		if v.ID == id {
+			location = v
+		}
+	}
+
+	return &location, nil
+}
+
+func (c client) CreateLocation(newLocation Location) (*Location, error) {
+	jsonData, err := json.Marshal(newLocation)
+	if err != nil {
+		return nil, fmt.Errorf("CreateLocation: Error on marshalling data: %s", err)
+	}
+
+	url := fmt.Sprintf("/link/%s/location", newLocation.LinkId)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("CreateLocation: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 response on creating the location\nurl=%s\nbody=%s", url, body)
+	}
+
+	var location Location
+	err = json.Unmarshal(body, &location)
+	if err != nil {
+		return nil, fmt.Errorf("CreateLocation: %s: %+v, name=%s, body=%s", err, location, location.Name, body)
+	}
+
+	return &location, nil
+}
+
+func (c client) UpdateLocation(id string, location *Location) error {
+	jsonData, err := json.Marshal(location)
+	if err != nil {
+		return fmt.Errorf("UpdateLocation: Error on marshalling data: %s", err)
+	}
+
+	url := fmt.Sprintf("/link/%s/location/%s", location.LinkId, id)
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("UpdateLocation: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Non-200 response on updating the location\nbody=%s", body)
+	}
+
+	return nil
+}
+
+func (c client) DeleteLocation(id string, linkId string) error {
+	url := fmt.Sprintf("/link/%s/location/%s", linkId, id)
+	req, err := http.NewRequest("DELETE", url, nil)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("DeleteLocation: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Non-200 response on deleting the link\nbody=%s", body)
+	}
+
+	return nil
+}
+
+// GetRoute Routes
+func (c client) GetRoute(id string, linkId string, locationId string) (*LocationRoute, error) {
+
+	location, err := c.GetLocation(locationId, linkId)
+	if err != nil {
+		return nil, fmt.Errorf("GetRoute: Error on getting location: %s", err)
+	}
+
+	var route LocationRoute
+	for _, v := range location.Routes {
+		if v.ID == id {
+			route = v
+		}
+	}
+
+	return &route, nil
+}
+
+func (c client) CreateRoute(newRoute LocationRoute) (*LocationRoute, error) {
+	jsonData, err := json.Marshal(newRoute)
+	if err != nil {
+		return nil, fmt.Errorf("CreateRoute: Error on marshalling data: %s", err)
+	}
+
+	url := fmt.Sprintf("/link/%s/location/%s/route", newRoute.LinkId, newRoute.LocationId)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("CreateLocation: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 response on creating the location route\nurl=%s\nbody=%s", url, body)
+	}
+
+	var route LocationRoute
+	err = json.Unmarshal(body, &route)
+	if err != nil {
+		return nil, fmt.Errorf("CreateLocation: %s: %+v, network=%s, body=%s", err, route, route.Network, body)
+	}
+
+	return &route, nil
+}
+
+func (c client) UpdateRoute(id string, route *LocationRoute) error {
+	jsonData, err := json.Marshal(route)
+	if err != nil {
+		return fmt.Errorf("UpdateRoute: Error on marshalling data: %s", err)
+	}
+
+	url := fmt.Sprintf("/link/%s/location/%s/route/%s", route.LinkId, route.LocationId, id)
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("UpdateRoute: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Non-200 response on updating the route\nbody=%s", body)
+	}
+
+	return nil
+}
+
+func (c client) DeleteRoute(id string, linkId string, locationId string) error {
+	url := fmt.Sprintf("/link/%s/location/%s/route/%s", linkId, locationId, id)
+	req, err := http.NewRequest("DELETE", url, nil)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("DeleteRoute: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Non-200 response on deleting the route\nbody=%s", body)
+	}
+
+	return nil
+}
+
+// GetHost Routes
+func (c client) GetHost(id string, linkId string, locationId string, uri any) (*LocationHost, error) {
+	location, err := c.GetLocation(locationId, linkId)
+	if err != nil {
+		return nil, fmt.Errorf("GetRoute: Error on getting location: %s", err)
+	}
+
+	var host LocationHost
+	for _, v := range location.Hosts {
+		if v.ID == id {
+			host = v
+		}
+	}
+
+	if uri.(string) == "" || uri == nil {
+		host.URI, _ = c.GetHostURI(id, linkId, locationId)
+	} else {
+		host.URI = uri.(string)
+	}
+
+	return &host, nil
+}
+
+func (c client) GetHostURI(id string, linkId string, locationId string) (string, error) {
+	url := fmt.Sprintf("/link/%s/location/%s/host/%s/uri", linkId, locationId, id)
+	req, err := http.NewRequest("GET", url, nil)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("GetLocation: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("Non-200 response on getting the locations\nbody=%s", body)
+	}
+
+	var host LocationHost
+	err = json.Unmarshal(body, &host)
+	if err != nil {
+		return "", fmt.Errorf("GetLocation: %s: %+v, body=%s", err, host, body)
+	}
+
+	return host.URI, nil
+}
+
+func (c client) CreateHost(newHost LocationHost) (*LocationHost, error) {
+	jsonData, err := json.Marshal(newHost)
+	if err != nil {
+		return nil, fmt.Errorf("CreateHost: Error on marshalling data: %s", err)
+	}
+
+	url := fmt.Sprintf("/link/%s/location/%s/host", newHost.LinkID, newHost.LocationID)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("CreateHost: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 response on creating the location route\nurl=%s\nbody=%s", url, body)
+	}
+
+	var host LocationHost
+	err = json.Unmarshal(body, &host)
+	if err != nil {
+		return nil, fmt.Errorf("CreateHost: %s: %+v, body=%s", err, host, body)
+	}
+
+	host.URI, _ = c.GetHostURI(host.ID, host.LinkID, host.LocationID)
+
+	return &host, nil
+}
+
+func (c client) UpdateHost(id string, host *LocationHost) error {
+	jsonData, err := json.Marshal(host)
+	if err != nil {
+		return fmt.Errorf("UpdateHost: Error on marshalling data: %s", err)
+	}
+
+	url := fmt.Sprintf("/link/%s/location/%s/host/%s", host.LinkID, host.LocationID, id)
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(jsonData))
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("UpdateRoute: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Non-200 response on updating the host\nbody=%s", body)
+	}
+
+	return nil
+}
+
+func (c client) DeleteHost(id string, linkId string, locationId string) error {
+	url := fmt.Sprintf("/link/%s/location/%s/host/%s", linkId, locationId, id)
+	req, err := http.NewRequest("DELETE", url, nil)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("DeleteHost: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Non-200 response on deleting the host\nbody=%s", body)
+	}
+
+	return nil
+}
+
 func NewClient(baseUrl, apiToken, apiSecret string, insecure bool) Client {
 	underlyingTransport := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
+		Proxy:           http.ProxyFromEnvironment,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: insecure},
 	}
 	httpClient := &http.Client{

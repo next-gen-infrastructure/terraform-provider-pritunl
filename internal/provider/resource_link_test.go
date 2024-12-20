@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
-func TestAccPritunlOrganization(t *testing.T) {
+func TestAccPritunlLink(t *testing.T) {
 
-	t.Run("creates organizations without error", func(t *testing.T) {
-		orgName := "tfacc-org1"
+	t.Run("creates links without error", func(t *testing.T) {
+		linkName := "tfacc-link1"
 
 		check := resource.ComposeTestCheckFunc(
-			resource.TestCheckResourceAttr("pritunl_organization.test", "name", orgName),
+			resource.TestCheckResourceAttr("pritunl_link.test", "name", linkName),
 		)
 
 		resource.Test(t, resource.TestCase{
@@ -20,19 +20,19 @@ func TestAccPritunlOrganization(t *testing.T) {
 			ProviderFactories: providerFactories,
 			Steps: []resource.TestStep{
 				{
-					Config: testPritunlOrganizationConfig(orgName),
+					Config: testPritunlLinkConfig(linkName),
 					Check:  check,
 				},
 				// import test
-				importStep("pritunl_organization.test"),
+				importStep("pritunl_link.test"),
 			},
 		})
 	})
 }
 
-func testPritunlOrganizationConfig(name string) string {
+func testPritunlLinkConfig(name string) string {
 	return fmt.Sprintf(`
-		resource "pritunl_organization" "test" {
+		resource "pritunl_link" "test" {
 			name    = "%[1]s"
 		}
 	`, name)
