@@ -39,7 +39,7 @@ func dataSourceLocationRead(_ context.Context, d *schema.ResourceData, meta inte
 
 	location, err := filterLocations(meta, filterFunction, linkId)
 	if err != nil {
-		return diag.Errorf("could not find location with a name %s. Previous error message: %v", location, err)
+		return diag.Errorf("could not find location with a name %+v. Previous error message: %v", location, err)
 	}
 
 	d.SetId(location.ID)

@@ -3,13 +3,17 @@ build:
 
 test:
 	@docker rm tf_pritunl_acc_test -f || true
-	@docker run --name tf_pritunl_acc_test --hostname pritunl.local --rm -d --privileged \
+	@docker run \
+		--platform linux/amd64 \
+		--name tf_pritunl_acc_test \
+		--hostname pritunl.local \
+		--rm -d --privileged \
 		-p 1194:1194/udp \
 		-p 1194:1194/tcp \
 		-p 80:80/tcp \
 		-p 443:443/tcp \
 		-p 27017:27017/tcp \
-		ghcr.io/jippi/docker-pritunl:1.32.3602.80
+		ghcr.io/jippi/docker-pritunl:latest
 
 	sleep 20
 

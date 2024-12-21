@@ -65,7 +65,7 @@ func dataSourceLinkRead(_ context.Context, d *schema.ResourceData, meta interfac
 
 	link, err := filterLinks(meta, filterFunction)
 	if err != nil {
-		return diag.Errorf("could not find link with a name %s. Previous error message: %v", link, err)
+		return diag.Errorf("could not find link with a name %+v. Previous error message: %v", link, err)
 	}
 
 	d.SetId(link.ID)

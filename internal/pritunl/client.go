@@ -1016,7 +1016,7 @@ func (c client) GetLocation(id string, linkId string) (*Location, error) {
 		return nil, fmt.Errorf("GetLocation: Error on getting link: %s", err)
 	}
 	if link == nil {
-		return nil, fmt.Errorf("GetLocation: Error on getting link: %s, %s", err, link)
+		return nil, fmt.Errorf("GetLocation: Error on getting link: %s, %+v", err, link)
 	}
 
 	url := fmt.Sprintf("/link/%s/location", linkId)
