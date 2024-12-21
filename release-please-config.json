@@ -1,0 +1,34 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "signoff":  "Alexander Dobrodey <8377544+ADobrodey@users.noreply.github.com>",
+  "packages": {
+    ".": {
+      "changelog-path": "CHANGELOG.md",
+      "release-type": "go",
+      "skip-github-release": false,
+      "bump-minor-pre-major": true,
+      "include-v-in-tag": true,
+      "draft": false,
+      "prerelease": false,
+      "extra-files": [
+        "Makefile"
+      ],
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features",
+          "hidden": false
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes",
+          "hidden": false
+        },
+        {
+          "type": "chore",
+          "section": "Miscellaneous",
+          "hidden": false
+        },
+    }
+  }
+}
