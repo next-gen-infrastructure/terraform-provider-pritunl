@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
-  "signoff":  "Alexander Dobrodey <8377544+ADobrodey@users.noreply.github.com>",
+  "signoff": "Alexander Dobrodey <8377544+ADobrodey@users.noreply.github.com>",
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
@@ -28,7 +28,8 @@
           "type": "chore",
           "section": "Miscellaneous",
           "hidden": false
-        },
+        }
+      ]
     }
   }
 }
