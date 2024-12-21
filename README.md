@@ -9,7 +9,7 @@
 
 [![Release](https://img.shields.io/github/v/release/next-gen-infrastructure/terraform-provider-pritunl)](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/releases)
 [![Registry](https://img.shields.io/badge/registry-doc%40latest-lightgrey?logo=terraform)](https://registry.terraform.io/providers/next-gen-infrastructure/pritunl/latest/docs)
-[![License](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/blob/master/LICENSE)  
+[![License](https://img.shields.io/badge/License-MPL%202.0-brightgreen.svg)](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/blob/main/LICENSE)  
 [![Go Report Card](https://goreportcard.com/badge/github.com/next-gen-infrastructure/terraform-provider-pritunl)](https://goreportcard.com/report/github.com/next-gen-infrastructure/terraform-provider-pritunl)
 
 - Website: https://www.terraform.io
