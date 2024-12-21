@@ -47,11 +47,13 @@ type Client interface {
 	StartServer(serverId string) error
 	StopServer(serverId string) error
 
+	GetLinks() ([]Link, error)
 	GetLink(id string) (*Link, error)
 	CreateLink(newLink Link) (*Link, error)
 	UpdateLink(id string, link *Link) error
 	DeleteLink(id string) error
 
+	GetLocations(linkId string) ([]Location, error)
 	GetLocation(id string, linkId string) (*Location, error)
 	CreateLocation(newLocation Location) (*Location, error)
 	UpdateLocation(id string, location *Location) error
@@ -983,7 +985,31 @@ func (c client) DetachHostFromServer(hostId, serverId string) error {
 	return nil
 }
 
-// GetLocation Locations
+// GetLocations Locations
+func (c client) GetLocations(linkId string) ([]Location, error) {
+	url := fmt.Sprintf("/link/%s/location", linkId)
+	req, err := http.NewRequest("GET", url, nil)
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("GetLocations: Error on HTTP request: %s", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Non-200 response on getting the locations\nbody=%s", body)
+	}
+
+	var locations []Location
+
+	err = json.Unmarshal(body, &locations)
+	if err != nil {
+		return nil, fmt.Errorf("GetLocations: %s: %+v, body=%s", err, locations, body)
+	}
+
+	return locations, nil
+}
 func (c client) GetLocation(id string, linkId string) (*Location, error) {
 	link, err := c.GetLink(linkId)
 	if err != nil {

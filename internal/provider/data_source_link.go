@@ -3,126 +3,98 @@ package provider
 import (
 	"context"
 	"errors"
-	"github.com/next-gen-infrastructure/terraform-provider-pritunl/internal/pritunl"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/next-gen-infrastructure/terraform-provider-pritunl/internal/pritunl"
 )
 
-func dataSourceHost() *schema.Resource {
+func dataSourceLink() *schema.Resource {
 	return &schema.Resource{
-		Description: "Use this data source to get information about the Pritunl hosts.",
-		ReadContext: dataSourceHostRead,
+		Description: "Use this data source to get information about the Pritunl link.",
+		ReadContext: dataSourceLinkRead,
 		Schema: map[string]*schema.Schema{
 			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"hostname": {
-				Description: "Hostname",
-				Type:        schema.TypeString,
-				Required:    true,
-			},
 			"name": {
-				Description: "Name of host",
-				Type:        schema.TypeString,
-				Computed:    true,
+				Type:     schema.TypeString,
+				Required: true,
 			},
-			"public_addr": {
-				Description: "Public IP address or domain name of the host",
-				Type:        schema.TypeString,
-				Computed:    true,
+			"type": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
-			"public_addr6": {
-				Description: "Public IPv6 address or domain name of the host",
-				Type:        schema.TypeString,
-				Computed:    true,
+			"ipv6": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
-			"routed_subnet6": {
-				Description: "IPv6 subnet that is routed to the host",
-				Type:        schema.TypeString,
-				Computed:    true,
+			"host_check": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
-			"routed_subnet6_wg": {
-				Description: "IPv6 WG subnet that is routed to the host",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"local_addr": {
-				Description: "Local network address for server",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"local_addr6": {
-				Description: "Local IPv6 network address for server",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"availability_group": {
-				Description: "Availability group for host. Replicated servers will only be replicated to a group of hosts in the same availability group\"",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"link_addr": {
-				Description: "IP address or domain used when linked servers connect to a linked server on this host",
-				Type:        schema.TypeString,
-				Computed:    true,
-			},
-			"sync_address": {
-				Description: "IP address or domain used by users when syncing configuration. This is needed when using a load balancer.",
-				Type:        schema.TypeString,
-				Computed:    true,
+			"action": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"status": {
-				Description: "Status of host",
-				Type:        schema.TypeString,
-				Computed:    true,
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"preferred_ike": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"preferred_esp": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"force_preferred": {
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 		},
 	}
 }
 
-func dataSourceHostRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	hostname := d.Get("hostname")
-	filterFunction := func(host pritunl.Host) bool {
-		return host.Hostname == hostname
+func dataSourceLinkRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	name := d.Get("name")
+	filterFunction := func(link pritunl.Link) bool {
+		return link.Name == name
 	}
 
-	host, err := filterHosts(meta, filterFunction)
+	link, err := filterLinks(meta, filterFunction)
 	if err != nil {
-		return diag.Errorf("could not find host with a hostname %s. Previous error message: %v", hostname, err)
+		return diag.Errorf("could not find link with a name %s. Previous error message: %v", link, err)
 	}
 
-	d.SetId(host.ID)
-	d.Set("name", host.Name)
-	d.Set("hostname", host.Hostname)
-	d.Set("public_addr", host.PublicAddr)
-	d.Set("public_addr6", host.PublicAddr6)
-	d.Set("routed_subnet6", host.RoutedSubnet6)
-	d.Set("routed_subnet6_wg", host.RoutedSubnet6WG)
-	d.Set("local_addr", host.LocalAddr)
-	d.Set("local_addr6", host.LocalAddr6)
-	d.Set("link_addr", host.LinkAddr)
-	d.Set("sync_address", host.SyncAddress)
-	d.Set("availability_group", host.AvailabilityGroup)
-	d.Set("status", host.Status)
+	d.SetId(link.ID)
+	_ = d.Set("name", link.Name)
+	_ = d.Set("type", link.Type)
+	_ = d.Set("ipv6", link.IPv6)
+	_ = d.Set("host_check", link.Name)
+	_ = d.Set("action", link.Action)
+	_ = d.Set("preferred_ike", link.PreferredIKE)
+	_ = d.Set("preferred_esp", link.PreferredESP)
+	_ = d.Set("force_preferred", link.ForcePreferred)
 
 	return nil
 }
 
-func filterHosts(meta interface{}, test func(host pritunl.Host) bool) (pritunl.Host, error) {
+func filterLinks(meta interface{}, test func(link pritunl.Link) bool) (pritunl.Link, error) {
 	apiClient := meta.(pritunl.Client)
 
-	hosts, err := apiClient.GetHosts()
+	links, err := apiClient.GetLinks()
 
 	if err != nil {
-		return pritunl.Host{}, err
+		return pritunl.Link{}, err
 	}
 
-	for _, dir := range hosts {
+	for _, dir := range links {
 		if test(dir) {
 			return dir, nil
 		}
 	}
 
-	return pritunl.Host{}, errors.New("could not find a host with specified parameters")
+	return pritunl.Link{}, errors.New("could not find a link with specified parameters")
 }
