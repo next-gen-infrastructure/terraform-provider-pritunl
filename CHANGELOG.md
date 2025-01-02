@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.2](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/compare/v0.5.1...v0.5.2) (2025-01-02)
+
+
+### Bug Fixes
+
+* Correct ping_timestamp_ttl ([b4b6ad3](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/commit/b4b6ad370817e163a231a1f620860b1f217c6d09))
+* Update documentation ([cd91241](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/commit/cd91241a89b2341aad2d6e4267fbfed11031b809))
+
 ## [0.5.1](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/compare/v0.5.0...v0.5.1) (2025-01-02)
 
 
