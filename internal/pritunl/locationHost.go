@@ -12,7 +12,7 @@ type LocationHost struct {
 	Timeout             *int    `json:"timeout"` // Use *int to allow null values
 	Priority            int     `json:"priority"`
 	Backoff             *int    `json:"backoff"`            // Use *int to allow null values
-	PingTimestampTTL    *int    `json:"ping_timestamp_ttl"` // Use *int to allow null values
+	PingTimestampTTL    *string `json:"ping_timestamp_ttl"` // Use *int to allow null values
 	Static              bool    `json:"static"`
 	PublicAddress       string  `json:"public_address"`
 	LocalAddress        string  `json:"local_address"`
