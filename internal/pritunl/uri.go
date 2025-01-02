@@ -12,7 +12,7 @@ type URI struct {
 	Timeout             int    `json:"timeout,omitempty"`
 	Priority            int    `json:"priority"`
 	Backoff             int    `json:"backoff,omitempty"`
-	PingTimestampTTL    int    `json:"ping_timestamp_ttl,omitempty"`
+	PingTimestampTTL    string `json:"ping_timestamp_ttl,omitempty"`
 	Static              bool   `json:"static"`
 	PublicAddress       string `json:"public_address"`
 	LocalAddress        string `json:"local_address"`
