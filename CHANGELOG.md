@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.3](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/compare/v0.5.2...v0.5.3) (2025-01-03)
+
+
+### Bug Fixes
+
+* Location hosts ([8c77f6a](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/commit/8c77f6ad4fb64ec0da0a24246e9b1e20338f8350))
+
 ## [0.5.2](https://github.com/next-gen-infrastructure/terraform-provider-pritunl/compare/v0.5.1...v0.5.2) (2025-01-02)
 
 
